@@ -1,0 +1,107 @@
+List.generate(itemCount, (index) {
+            return InkWell(
+              highlightColor: Colors.transparent,
+              splashColor: Colors.transparent,
+              onTap: () {
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => Editor(noteID: _keyList[index])));
+              },
+              child: Container(
+                margin: const EdgeInsets.only(bottom: 10, right: 8),
+                height: 200,
+                width: 150,
+                decoration: BoxDecoration(
+                    color: lightColorScheme.primaryContainer,
+                    borderRadius: BorderRadius.circular(20)),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    FutureBuilder<String>(
+                        future: previewNote(_keyList[index], 0),
+                        builder: (context, snapshot) {
+                          if (snapshot.connectionState ==
+                              ConnectionState.waiting) {
+                            return CircularProgressIndicator();
+                          } else if (snapshot.hasError) {
+                            return Text("Error: ${snapshot.error}");
+                          } else {
+                            if (snapshot.data!.isEmpty) {
+                              return Container(height: 10,);
+                            } else {
+                              return Container(
+                                padding: const EdgeInsets.only(left: 13, right: 13, top: 10),
+                                child: Text(
+                                  snapshot.data!.length > 25
+                                      ? snapshot.data!.substring(0, 25) + '...'
+                                      : snapshot.data!,
+                                  style: GoogleFonts.nunito(
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: 16,
+                                  ),
+                                ),
+                              );
+                            }
+                          }
+
+                        }
+                    ),
+                    Expanded(
+                      child: Container(
+                        padding: EdgeInsets.only(left: 13, right: 13, top: 3),
+                        child: FutureBuilder<String>(
+                          future: previewNote(_keyList[index],
+                              1),
+                          builder: (context, snapshot) {
+                            if (snapshot.connectionState ==
+                                ConnectionState.waiting) {
+                              return CircularProgressIndicator();
+                            } else if (snapshot.hasError) {
+                              return Text("Error: ${snapshot.error}");
+                            } else {
+                              return Text(
+                                snapshot.data ?? "err",
+                                overflow: TextOverflow.ellipsis,
+                                maxLines: 5,
+                                style: GoogleFonts.nunito(
+                                    fontWeight: FontWeight.w300,
+                                    fontSize: 14.5,
+                                    color: Colors.black.withOpacity(0.75)),
+                              );
+                            }
+                          },
+                        ),
+                      ),
+                    ),
+                    Container(
+                      height: 20,
+                      child: FutureBuilder<String>(
+                        future: previewNote(_keyList[index], 2),
+                        builder: (context, snapshot) {
+                          if (snapshot.connectionState ==
+                              ConnectionState.waiting) {
+                            return CircularProgressIndicator();
+                          } else if (snapshot.hasError) {
+                            return Text("Error: ${snapshot.error}");
+                          } else {
+                            return Align(
+                              alignment: Alignment(0.70, -1),
+                              child: Text(
+                                snapshot.data ?? "err",
+                                style: GoogleFonts.nunito(
+                                    fontWeight: FontWeight.w200,
+                                    fontSize: 10,
+                                    color: Colors.black.withOpacity(0.75)),
+                              ),
+                            );
+                          }
+                        },
+                      ),
+                    )
+                  ],
+                ),
+              ),
+            );
+          })
