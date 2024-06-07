@@ -1,11 +1,8 @@
 import 'dart:async';
-import 'dart:convert';
 import 'dart:io';
 
-import 'package:Noted/image_caching/image_cache.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
@@ -69,7 +66,7 @@ class _EditorState extends State<Editor> with SingleTickerProviderStateMixin {
     _scaleAnimController = AnimationController(
       vsync: this,
       duration:
-          const Duration(milliseconds: 200), // Adjust the duration as needed
+          const Duration(milliseconds: 200),
     );
 
     characterCount = textEditor.text.length;
@@ -82,13 +79,14 @@ class _EditorState extends State<Editor> with SingleTickerProviderStateMixin {
 
   @override
   void dispose() {
-    super.dispose();
+    
     if (_scaleAnimController!.isAnimating) {
       _scaleAnimController!.stop();
       _scaleAnimController!.dispose();
     }
     titleTextFielfController.dispose();
     textEditor.dispose();
+    super.dispose();
   }
 
   void readNote() {
@@ -104,14 +102,14 @@ class _EditorState extends State<Editor> with SingleTickerProviderStateMixin {
     textEditor.text = note;
 
     if (widget.note?.image != null) {
-      img = widget.note?.image ?? "";
+      setState(() {
+        imgPath = widget.note?.image ?? "";
+      });
     }
   }
 
   void addOrUpdateNote() {
     bool isUpdating = widget.note != null;
-
-    print("${widget.note?.id} + ${textEditor.text}");
 
     if (isUpdating) {
       updateNote();
@@ -129,7 +127,7 @@ class _EditorState extends State<Editor> with SingleTickerProviderStateMixin {
         lastSavedDate: DateTime.now(),
         createdTime: DateTime.now(),
         isFavorite: isFavorite,
-        image: img);
+        image: imgPath);
 
     await NotesDatabase.instance.update(noted);
     streamController.add("");
@@ -155,7 +153,7 @@ class _EditorState extends State<Editor> with SingleTickerProviderStateMixin {
         lastSavedDate: DateTime.now(),
         createdTime: DateTime.now(),
         isFavorite: isFavorite,
-        image: img,
+        image: imgPath ?? "",
       );
 
       await NotesDatabase.instance.create(noted);
@@ -242,12 +240,11 @@ class _EditorState extends State<Editor> with SingleTickerProviderStateMixin {
                 Expanded(
                   child: ListView(
                     children: [
-                      img.isNotEmpty
+                      imgPath!= null
                           ? InkWell(
                               onTap: () => showSelectCameraOrGallery(),
-                              child: Image(
-                                  image: CacheMemoryImageProvider(
-                                      img, base64Decode(img))))
+                              child: Image.file(File(imgPath!))
+                              )
                           : Container(),
                       Padding(
                         padding:
@@ -261,6 +258,14 @@ class _EditorState extends State<Editor> with SingleTickerProviderStateMixin {
                             isChanged = true;
                             if (!_scaleAnimController!.isCompleted) {
                               _scaleAnimController?.forward();
+                            }
+                          },
+                          onTap: () {
+                            
+                            if (viewMode){
+                              setState(() {
+                                viewMode = false;
+                              });
                             }
                           },
                           decoration: const InputDecoration(
@@ -278,6 +283,7 @@ class _EditorState extends State<Editor> with SingleTickerProviderStateMixin {
                         padding: const EdgeInsets.only(left: 20, right: 20),
                         child: TextField(
                           onTap: () {
+                            
                             viewMode = false;
                           },
                           onChanged: (text) {
@@ -356,6 +362,8 @@ class _EditorState extends State<Editor> with SingleTickerProviderStateMixin {
   }
 
   File? image;
+  String? imgPath;
+
   Future _pickImage(ImageSource imageSource) async {
     try {
       final image = await ImagePicker().pickImage(source: imageSource);
@@ -365,8 +373,9 @@ class _EditorState extends State<Editor> with SingleTickerProviderStateMixin {
 
       if (image == null) return;
 
-      final imageTemporary = File(image.path);
-      _compressAndGetImgByte(imageTemporary);
+      setState(() {
+        imgPath = image.path;
+      });
 
       _scaleAnimController!.forward();
     } on PlatformException catch (e) {
@@ -374,18 +383,5 @@ class _EditorState extends State<Editor> with SingleTickerProviderStateMixin {
     }
   }
 
-  Future _compressAndGetImgByte(File image) async {
-    final imageBytes = await image.readAsBytes();
-
-    final compressImage =
-        await FlutterImageCompress.compressWithList(imageBytes, quality: 65);
-
-    String base64Img = base64Encode(compressImage);
-
-    setState(() {
-      img = base64Img;
-
-      streamController.add("");
-    });
-  }
+  
 }

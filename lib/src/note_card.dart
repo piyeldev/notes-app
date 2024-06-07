@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:Noted/src/editor.dart';
 import 'package:flutter/material.dart';
@@ -38,7 +39,7 @@ class NoteCard extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(borderRadius: BorderRadius.circular(10)),
       child: InkWell(
-        overlayColor: MaterialStateProperty.all(Colors.black),
+        // overlayColor: MaterialStateProperty.all(Colors.black),
         onTap: () {
           Navigator.of(context).push(PageRouteBuilder(
             transitionDuration: const Duration(milliseconds: 300),
@@ -57,14 +58,25 @@ class NoteCard extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: [
-              note.image.isNotEmpty? Container(
-                clipBehavior: Clip.hardEdge,
-                decoration: const BoxDecoration(
-                    borderRadius: BorderRadius.only(
-                        topLeft: Radius.circular(10),
-                        topRight: Radius.circular(10))),
-                child: Image(image: CacheMemoryImageProvider(note.image, base64Decode(note.image))),)
-                  : Container(height: 5,),
+              note.image.isNotEmpty
+                  ? Center(
+                      child: Container(
+                        clipBehavior: Clip.hardEdge,
+                      padding: const EdgeInsets.only(top: 5, left: 5, right: 5),
+                      decoration: const BoxDecoration(
+                          borderRadius: BorderRadius.only(
+                              topLeft: Radius.circular(25),
+                              topRight: Radius.circular(25))),
+                      constraints: BoxConstraints(maxHeight: 240),
+                      child: Image.file(
+                        File(note.image),
+                        width: double.infinity,
+                        fit: BoxFit.cover,
+                      ),
+                    ))
+                  : Container(
+                      height: 5,
+                    ),
               Padding(
                 padding: const EdgeInsets.only(right: 10, left: 10, top: 5),
                 child: Text(
@@ -111,10 +123,10 @@ class NoteCard extends StatelessWidget {
                         ),
                         note.isFavorite
                             ? const Icon(
-                          FontAwesomeIcons.solidHeart,
-                          color: Colors.red,
-                          size: 15,
-                        )
+                                FontAwesomeIcons.solidHeart,
+                                color: Colors.red,
+                                size: 15,
+                              )
                             : const SizedBox(),
                       ],
                     ),
@@ -145,7 +157,6 @@ class ListNotes extends StatelessWidget {
       decoration: BoxDecoration(
           color: lightColorScheme.primaryContainer,
           borderRadius: BorderRadius.circular(20)),
-
       padding: const EdgeInsets.all(10),
       child: Column(
         children: [
