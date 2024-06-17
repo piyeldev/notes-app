@@ -1,6 +1,7 @@
 import 'dart:core';
 import 'dart:async';
 import 'dart:math';
+import 'package:Noted/src/drawer.dart';
 import 'package:flutter/widgets.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter/material.dart';
@@ -135,43 +136,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
             },
           ),
         ),
-        drawer: Drawer(
-          child: ListView(
-            children: [
-              Container(
-                  child: Text(
-                    "Noted !",
-                    style: GoogleFonts.nunitoSans(
-                        fontWeight: FontWeight.bold, fontSize: 24),
-                  ),
-                  padding: const EdgeInsets.only(left: 18, top: 10)),
-              Divider(
-                color: Colors.black54,
-                endIndent: 24,
-                indent: 12,
-              ),
-              Material(
-                type: MaterialType.transparency,                child: ListTile(
-                  selected: true,
-                  selectedColor: Colors.black,
-                  // tileColor: Theme.of(context).cardColor,
-                  title: const Text('Notes'),
-                  onTap: () {
-                    // Update the state of the app.
-                    // ...
-                  },
-                ),
-              ),
-              ListTile(
-                title: const Text('Tasks'),
-                onTap: () {
-                  // Update the state of the app.
-                  // ...
-                },
-              ),
-            ],
-          ),
-        ),
+        drawer: HomeDrawer(),
         endDrawerEnableOpenDragGesture: false,
         body: isLoading
             ? const Center(child: CircularProgressIndicator())
